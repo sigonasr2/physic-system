@@ -3,7 +3,7 @@
 #include "olcPixelGameEngine.h"
 #include "Particle.h"
 #include "Constants.h"
-#include <chrono>
+#include "Force.h"
 
 class Application
 {
@@ -12,7 +12,10 @@ public:
 	~Application() = default;
 
 public:
-	Particle* particle;
+	std::vector<Particle*> particles;
+	Vec2 pushForce = Vec2(0,0);
+
+
 	
 public:
 
