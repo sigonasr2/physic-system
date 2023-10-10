@@ -2,34 +2,55 @@
 
 void Application::Setup()
 {
-	//Particle* smallBall = new Particle(50, 100, 1.0f);
-	//smallBall->radius = 4;
-	//particles.push_back(smallBall);
-	//
-	//Particle* bigBall = new Particle(200, 100, 3.0f);
-	//bigBall->radius = 12;
-	//particles.push_back(bigBall);
+	std::vector<Vec2> modelcircle;
+	modelcircle.push_back({ 0.0f,0.0f });
+	int nPoints = 20;
+	for (int i = 0; i < nPoints; i++)
+	{
+		modelcircle.push_back({ cosf(i / (float)(nPoints - 1) * 2.0f * 3.14159f), sinf(i / (float)(nPoints - 1) * 2.0f * 3.14159f) });
+
+	}
+
+	Body* body = new Body(CircleShape(50,modelcircle), 400, 300, 1.0f);
+	
+	Bodies.push_back(body);
 }
 
 void Application::Input(olc::PixelGameEngine* ptr)
 {
-	if (ptr->GetKey(olc::UP).bHeld) pushForce.y = -50 * PIXELS_PER_METER;
-    if (ptr->GetKey(olc::DOWN).bHeld) pushForce.y = +50 * PIXELS_PER_METER;
-    if (ptr->GetKey(olc::LEFT).bHeld) pushForce.x = -50 * PIXELS_PER_METER;
-	if (ptr->GetKey(olc::RIGHT).bHeld) pushForce.x = +50 * PIXELS_PER_METER;
+	if (ptr->GetKey(olc::UP).bHeld) 
+		pushForce.y = -100 * PIXELS_PER_METER;
+    if (ptr->GetKey(olc::DOWN).bHeld) 
+		pushForce.y = +100 * PIXELS_PER_METER;
+    if (ptr->GetKey(olc::LEFT).bHeld) pushForce.x = -100 * PIXELS_PER_METER;
+	if (ptr->GetKey(olc::RIGHT).bHeld) pushForce.x = +100 * PIXELS_PER_METER;
 
 	if (ptr->GetKey(olc::UP).bReleased) pushForce.y = 0;
 	if (ptr->GetKey(olc::DOWN).bReleased) pushForce.y = 0;
 	if (ptr->GetKey(olc::LEFT).bReleased) pushForce.x = 0;
 	if (ptr->GetKey(olc::RIGHT).bReleased) pushForce.x = 0;
 
-	if (ptr->GetMouse(1).bPressed)
-	{
-		Particle* particle = new Particle(ptr->GetMouseX(), ptr->GetMouseY(), 1.0f);
-		particle->radius = 5;
-		particles.push_back(particle);
-	}
-	
+	//if (ptr->GetMouse(1).bPressed)
+	//{
+	//	body* body = new body(ptr->GetMouseX(), ptr->GetMouseY(), 1.0f);
+	//	body->radius = 5;
+	//	bodys.push_back(body);
+	//}
+	//
+	//if (ptr->GetMouse(0).bHeld)
+	//{
+	//	int lastbody = NUM_bodyS - 1;
+	//	mousepressedlocation = Vec2(ptr->GetMouseX(), ptr->GetMouseY());
+	//	ptr->DrawLine(Bodies[lastbody]->position.x, Bodies[lastbody]->position.y, mousepressedlocation.x, mousepressedlocation.y);
+	//}
+	//
+	//if (ptr->GetMouse(0).bReleased)
+	//{
+	//	int lastbody = NUM_bodyS - 1;
+	//	Vec2 impulseDirection = (Bodies[lastbody]->position - mousepressedlocation).UnitVector();
+	//	float impulseMagnitude = (Bodies[lastbody]->position - mousepressedlocation).Magnitude() * 5.0f;
+	//	Bodies[0]->velocity = impulseDirection * impulseMagnitude;
+	//}
 }
 
 void Application::Update(float deltatime,olc::PixelGameEngine* ptr)
@@ -38,72 +59,114 @@ void Application::Update(float deltatime,olc::PixelGameEngine* ptr)
 	{
 		deltatime = 0.017f;
 	}
+	
+	Bodies[0]->AddForce(pushForce);
 
-
-	for (auto particle : particles)
+	for (auto body : Bodies)
 	{
-		Vec2 wind = Vec2(0.2f * PIXELS_PER_METER, 0.0f);
-		Vec2 weight = Vec2(0.0f, particle->mass * 9.8f * PIXELS_PER_METER);
-		//particle->AddForce(wind); //wind
-		particle->AddForce(weight); //gravity
-		particle->AddForce(pushForce);
 
-		//drag force
-		if (particle->position.y >= (ptr->ScreenHeight() / 2))
-		{
-			Vec2 drag = Force::GenerateDragForce(*particle, 0.04);
-			particle->AddForce(drag);
-		}
+		Vec2 drag = Force::GenerateDragForce(*body, 0.002f);
+		body->AddForce(drag);
+
+		Vec2 weight = Vec2(0.0f, body->mass * 9.8f * PIXELS_PER_METER);
+		body->AddForce(weight);
 
 	}
 
-	for (auto particle : particles)
+	
+	
+
+
+	for (auto body : Bodies)
 	{
-		particle->integrate(deltatime);
+		body->integrate(deltatime);
 	}
 
-	for (auto particle : particles)
+	for (auto body : Bodies)
 	{
-		if (particle->position.x - particle->radius <= 0)
+		if (body->shape->GetType() == CIRCLE)
 		{
-			particle->position.x = particle->radius;
-			particle->velocity.x *= -0.9f;
-		}
-		else if (particle->position.x + particle->radius >= ptr->ScreenWidth())
-		{
-			particle->position.x = ptr->ScreenWidth() - particle->radius;
-			particle->velocity.x *= -0.9f;
-		}
+			CircleShape* circleshape = (CircleShape*)body->shape;
+			if (body->position.x - circleshape->radius <= 0)
+			{
+				body->position.x = circleshape->radius;
+				body->velocity.x *= -0.9f;
+			}
+			else if (body->position.x + circleshape->radius >= ptr->ScreenWidth())
+			{
+				body->position.x = ptr->ScreenWidth() - circleshape->radius;
+				body->velocity.x *= -0.9f;
+			}
 
-		if (particle->position.y - particle->radius <= 0)
-		{
-			particle->position.y = particle->radius;
-			particle->velocity.y *= -0.9f;
-		}
-		else if (particle->position.y + particle->radius >= ptr->ScreenHeight())
-		{
-			particle->position.y = ptr->ScreenHeight() - particle->radius;
-			particle->velocity.y *= -.9f;
+			if (body->position.y - circleshape->radius <= 0)
+			{
+				body->position.y = circleshape->radius;
+				body->velocity.y *= -0.9f;
+			}
+			else if (body->position.y + circleshape->radius >= ptr->ScreenHeight())
+			{
+				body->position.y = ptr->ScreenHeight() - circleshape->radius;
+				body->velocity.y *= -.9f;
 
+			}
 		}
-
 	}
 }
 
 void Application::Render(olc::PixelGameEngine* ptr)
 {
-	ptr->FillRect(0, ptr->ScreenHeight() / 2, ptr->ScreenWidth(), ptr->ScreenHeight() / 2, olc::BLUE);
+	for (auto& body : Bodies)
+	{
+		if (body->shape->GetType() == CIRCLE)
+		{
+			CircleShape* circleshape = (CircleShape*)body->shape;
+			//ptr->DrawCircle(body->position.x, body->position.y, circleshape->radius, olc::CYAN);
+			DraweWireFrameModel(ptr, circleshape->vertices, body->position.x, body->position.y, circleshape->radius);
+		}
+		else
+		{
 
-	for(auto particle : particles )
-	ptr->FillCircle(particle->position.x, particle->position.y, particle->radius);
-
-
+		}
+	}
 }
 
 void Application::Destroy()
 {
-	for (auto particle : particles)
+	for (auto body : Bodies)
 	{
-		delete particle;
+		delete body;
 	}
+}
+
+void Application::DraweWireFrameModel(olc::PixelGameEngine* pge, const std::vector<Vec2> vecmodelcoordinates, float x, float y, float r, float s, olc::Pixel p)
+{
+	std::vector<Vec2> vecTransformedCoordinates;
+	int verts = vecmodelcoordinates.size();
+	vecTransformedCoordinates.resize(verts);
+
+	for (int i = 0; i < verts; i++)
+	{
+		vecTransformedCoordinates[i].x = vecmodelcoordinates[i].x * cosf(r) - vecmodelcoordinates[i].y * sinf(r);
+		vecTransformedCoordinates[i].y = vecmodelcoordinates[i].x * sinf(r) + vecmodelcoordinates[i].y * cosf(r);
+	}
+
+	for (int i = 0; i < verts; i++)
+	{
+		vecTransformedCoordinates[i].x = vecTransformedCoordinates[i].x * s;
+		vecTransformedCoordinates[i].y = vecTransformedCoordinates[i].y * s;
+ 	}
+
+	for (int i = 0; i < verts; i++)
+	{
+		vecTransformedCoordinates[i].x = vecTransformedCoordinates[i].x + x;
+		vecTransformedCoordinates[i].y = vecTransformedCoordinates[i].y + y;
+	}
+
+	for (int i = 0; i < verts + 1; i++)
+	{
+		int j = (i + 1);
+		pge->DrawLine(vecTransformedCoordinates[i % verts].x, vecTransformedCoordinates[i % verts].y,
+			vecTransformedCoordinates[j % verts].x, vecTransformedCoordinates[j % verts].y, p);
+	}
+
 }
