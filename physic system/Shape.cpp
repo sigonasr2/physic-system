@@ -1,14 +1,18 @@
 #include "Shape.h"
 #include <iostream>
 
-CircleShape::CircleShape(const float radius, const std::vector<Vec2> vertices)
+CircleShape::CircleShape(const float radius, const int VerticesCount)
 {
 	this->radius = radius;
-
-	for (auto vertex : vertices)
+	this->vertexCount = VerticesCount;
+	vertices.push_back(Vec2(0.0f, 0.0f));
+	for (int i = 0; i < vertexCount; i++)
 	{
-		this->vertices.push_back(vertex);
+		vertices.push_back({ cosf(i / (float)(vertexCount - 1) * 2.0f * 3.14159f), sinf(i / (float)(vertexCount - 1) * 2.0f * 3.14159f) });
+
 	}
+
+	
 	std::cout << "circleshape constructor called" << std::endl;
 
 }
@@ -25,19 +29,73 @@ ShapeType CircleShape::GetType() const
 
 Shape* CircleShape::Clone() const
 {
-	return new CircleShape(radius, vertices);
+	return new CircleShape(radius, vertexCount);
+}
+
+float CircleShape::GetMomentOfInertia() const
+{
+	return 0.5f * ( radius * radius);
 }
 
 PolygonShape::PolygonShape(const std::vector<Vec2> vertices)
 {
-	//this->vertices = vertices;
-	std::cout << "polygoneshape constructor called" << std::endl;
+	for (auto vertex : vertices)
+	{
+		localvertices.push_back(vertex);
+		worldvertices.push_back(vertex);
+	}
 }
 
 PolygonShape::~PolygonShape()
 {
+
 	std::cout << "polygoneshape destructor called" << std::endl;
 }
+
+Vec2 PolygonShape::EdgeAt(int index) const
+{
+	int currVertex = index;
+	int nextVertex = (index + 1) % worldvertices.size();
+
+	return worldvertices[nextVertex] - worldvertices[currVertex];
+}
+
+float PolygonShape::FindMinSeparation(PolygonShape* other, Vec2& axis, Vec2& point)
+{
+	float separation = std::numeric_limits<float>::lowest();
+
+	for (int i = 0; i < worldvertices.size(); i++)
+	{
+		Vec2 va = this->worldvertices[i];
+		Vec2 normal = this->EdgeAt(i).Normal();
+
+		float minSep = std::numeric_limits<float>::max();
+		Vec2 minVertex;
+		for (int j = 0; j < other->worldvertices.size(); j++)
+		{
+			Vec2 vb = other->worldvertices[j];
+			float proj = (vb - va).Dot(normal);
+			if (proj < minSep)
+			{
+				minSep = proj;
+				minVertex = vb;
+			}
+			
+
+
+		}
+		if (minSep > separation)
+		{
+			separation = minSep;
+			axis = this->EdgeAt(i);
+			point = minVertex;
+		}
+	}
+
+	return separation;
+}
+
+
 
 ShapeType PolygonShape::GetType() const
 {
@@ -46,7 +104,21 @@ ShapeType PolygonShape::GetType() const
 
 Shape* PolygonShape::Clone() const
 {
-	return new PolygonShape(vertices);
+	return new PolygonShape(localvertices);
+}
+
+float PolygonShape::GetMomentOfInertia() const
+{
+	return 5000;
+}
+
+void PolygonShape::UpdateVertices(float angle, const Vec2& position)
+{
+	for (int i = 0; i < localvertices.size(); i++)
+	{
+		worldvertices[i] = localvertices[i].Rotate(angle);
+		worldvertices[i] += position;
+	}
 }
 
 BoxShape::BoxShape(float width, float height)
@@ -54,7 +126,16 @@ BoxShape::BoxShape(float width, float height)
 	this->width = width;
 	this->height = height;
 
-	//vertices.push_back(Vec2())
+	localvertices.push_back(Vec2(-width / 2.0f, -height / 2.0f)); 
+	localvertices.push_back(Vec2(+width / 2.0f, -height / 2.0f));
+	localvertices.push_back(Vec2(+width / 2.0f, +height / 2.0f));
+	localvertices.push_back(Vec2(-width / 2.0f, +height / 2.0f));
+
+	worldvertices.push_back(Vec2(-width / 2.0f, -height / 2.0f));
+	worldvertices.push_back(Vec2(+width / 2.0f, -height / 2.0f));
+	worldvertices.push_back(Vec2(+width / 2.0f, +height / 2.0f));
+	worldvertices.push_back(Vec2(-width / 2.0f, +height / 2.0f));
+	
 }
 
 BoxShape::~BoxShape()
@@ -69,4 +150,9 @@ ShapeType BoxShape::GetType() const
 Shape* BoxShape::Clone() const
 {
 	return new BoxShape(width,height);
+}
+
+float BoxShape::GetMomentOfInertia() const
+{
+	return (0.083333) * (width * width + height * height);
 }

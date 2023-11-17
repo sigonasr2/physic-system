@@ -4,6 +4,9 @@
 #include "Body.h"
 #include "Constants.h"
 #include "Force.h"
+#include "Graphics.h"
+#include "CollisionDetection.h"
+#include "Contact.h"
 
 class Application
 {
@@ -18,10 +21,11 @@ public:
 	float k = 500;
 	float restLength = 200.0f;
 	const int NUM_PARTICLES = 4;
-
+	bool debug = false;
 	Vec2 mousepressedlocation;
 	Vec2 mousereleasedlocation;
-	
+	olc::Sprite* sprite;
+	olc::Decal* Dsprite;
 	
 public:
 
