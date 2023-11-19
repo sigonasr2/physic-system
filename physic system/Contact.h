@@ -8,10 +8,10 @@ struct Contact
 	Body* a;
 	Body* b;
 
-	Vec2 start;
-	Vec2 end;
+	Vec2f start;
+	Vec2f end;
 
-	Vec2 normal;
+	Vec2f normal;
 	float depth;
 
 	Contact() = default;

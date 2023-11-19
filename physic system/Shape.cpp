@@ -5,7 +5,7 @@ CircleShape::CircleShape(const float radius, const int VerticesCount)
 {
 	this->radius = radius;
 	this->vertexCount = VerticesCount;
-	vertices.push_back(Vec2(0.0f, 0.0f));
+	vertices.push_back(Vec2f(0.0f, 0.0f));
 	for (int i = 0; i < vertexCount; i++)
 	{
 		vertices.push_back({ cosf(i / (float)(vertexCount - 1) * 2.0f * 3.14159f), sinf(i / (float)(vertexCount - 1) * 2.0f * 3.14159f) });
@@ -37,7 +37,7 @@ float CircleShape::GetMomentOfInertia() const
 	return 0.5f * ( radius * radius);
 }
 
-PolygonShape::PolygonShape(const std::vector<Vec2> vertices)
+PolygonShape::PolygonShape(const std::vector<Vec2f> vertices)
 {
 	for (auto vertex : vertices)
 	{
@@ -52,7 +52,7 @@ PolygonShape::~PolygonShape()
 	std::cout << "polygoneshape destructor called" << std::endl;
 }
 
-Vec2 PolygonShape::EdgeAt(int index) const
+Vec2f PolygonShape::EdgeAt(int index) const
 {
 	int currVertex = index;
 	int nextVertex = (index + 1) % worldvertices.size();
@@ -60,20 +60,20 @@ Vec2 PolygonShape::EdgeAt(int index) const
 	return worldvertices[nextVertex] - worldvertices[currVertex];
 }
 
-float PolygonShape::FindMinSeparation(PolygonShape* other, Vec2& axis, Vec2& point)
+float PolygonShape::FindMinSeparation(PolygonShape* other, Vec2f& axis, Vec2f& point)
 {
 	float separation = std::numeric_limits<float>::lowest();
 
 	for (int i = 0; i < worldvertices.size(); i++)
 	{
-		Vec2 va = this->worldvertices[i];
-		Vec2 normal = this->EdgeAt(i).Normal();
+		Vec2f va = this->worldvertices[i];
+		Vec2f normal = this->EdgeAt(i).Normal();
 
 		float minSep = std::numeric_limits<float>::max();
-		Vec2 minVertex;
+		Vec2f minVertex;
 		for (int j = 0; j < other->worldvertices.size(); j++)
 		{
-			Vec2 vb = other->worldvertices[j];
+			Vec2f vb = other->worldvertices[j];
 			float proj = (vb - va).Dot(normal);
 			if (proj < minSep)
 			{
@@ -112,7 +112,7 @@ float PolygonShape::GetMomentOfInertia() const
 	return 5000;
 }
 
-void PolygonShape::UpdateVertices(float angle, const Vec2& position)
+void PolygonShape::UpdateVertices(float angle, const Vec2f& position)
 {
 	for (int i = 0; i < localvertices.size(); i++)
 	{
@@ -126,15 +126,15 @@ BoxShape::BoxShape(float width, float height)
 	this->width = width;
 	this->height = height;
 
-	localvertices.push_back(Vec2(-width / 2.0f, -height / 2.0f)); 
-	localvertices.push_back(Vec2(+width / 2.0f, -height / 2.0f));
-	localvertices.push_back(Vec2(+width / 2.0f, +height / 2.0f));
-	localvertices.push_back(Vec2(-width / 2.0f, +height / 2.0f));
+	localvertices.push_back(Vec2f(-width / 2.0f, -height / 2.0f)); 
+	localvertices.push_back(Vec2f(+width / 2.0f, -height / 2.0f));
+	localvertices.push_back(Vec2f(+width / 2.0f, +height / 2.0f));
+	localvertices.push_back(Vec2f(-width / 2.0f, +height / 2.0f));
 
-	worldvertices.push_back(Vec2(-width / 2.0f, -height / 2.0f));
-	worldvertices.push_back(Vec2(+width / 2.0f, -height / 2.0f));
-	worldvertices.push_back(Vec2(+width / 2.0f, +height / 2.0f));
-	worldvertices.push_back(Vec2(-width / 2.0f, +height / 2.0f));
+	worldvertices.push_back(Vec2f(-width / 2.0f, -height / 2.0f));
+	worldvertices.push_back(Vec2f(+width / 2.0f, -height / 2.0f));
+	worldvertices.push_back(Vec2f(+width / 2.0f, +height / 2.0f));
+	worldvertices.push_back(Vec2f(-width / 2.0f, +height / 2.0f));
 	
 }
 

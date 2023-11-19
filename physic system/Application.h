@@ -16,14 +16,14 @@ public:
 
 public:
 	std::vector<Body*> Bodies;
-	Vec2 pushForce = Vec2(0,0);
-	
+	Vec2f pushForce = Vec2f(0,0);
+	Vec2f* pSelected = nullptr;
 	float k = 500;
 	float restLength = 200.0f;
 	const int NUM_PARTICLES = 4;
 	bool debug = false;
-	Vec2 mousepressedlocation;
-	Vec2 mousereleasedlocation;
+	Vec2f mousepressedlocation;
+	Vec2f mousereleasedlocation;
 	olc::Sprite* sprite;
 	olc::Decal* Dsprite;
 	
@@ -35,7 +35,7 @@ public:
 	void Render(olc::PixelGameEngine* ptr);
 	void Destroy();
 	void DraweWireFrameModel(olc::PixelGameEngine* pge,
-		const std::vector<Vec2> vecmodelcoordinates,
+		const std::vector<Vec2f> vecmodelcoordinates,
 		float x, float y,
 		float r = 0.0f, float s = 1.0f,
 		olc::Pixel p = olc::WHITE);

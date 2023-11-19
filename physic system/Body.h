@@ -7,10 +7,10 @@ struct Body
 {
 	//linear stuff
 	bool isColliding = false;
-	Vec2 position;
-	Vec2 velocity;
-	Vec2 acceleration;
-	Vec2 sumForces;
+	Vec2f position;
+	Vec2f velocity;
+	Vec2f acceleration;
+	Vec2f sumForces;
 	float mass;
 	float invMass;
 
@@ -21,7 +21,8 @@ struct Body
 	float sumTorque;
 	float Inertia;
 	float invInertia;
-
+	bool rotationstatic = false;
+	bool movementstatic = false;
 	float friction;
 	float restitution; 
 	olc::Sprite* sprite = nullptr;
@@ -32,13 +33,13 @@ struct Body
 	~Body();
 	void integrateLinear(float deltatime);
 	void integrateAngular(float deltatime);
-	void AddForce(const Vec2& force);
+	void AddForce(const Vec2f& force);
 	void AddTorque(float torque);
 	void ClearTorgue();
 	void ClearForces();
 	bool IsStatic() const;
-	void ApplyImpulse(const Vec2& j);
-	void ApplyImpulse(const Vec2& j, const Vec2& r);
+	void ApplyImpulse(const Vec2f& j);
+	void ApplyImpulse(const Vec2f& j, const Vec2f& r);
 	void SetTexture(const char* textureFileName);
 	void Update(float deltatime);
 };

@@ -5,16 +5,16 @@ Body::Body(const Shape& shape,float x, float y, float mass)
 {
 	this->shape = shape.Clone();
 	//linear motion
-	this->position = Vec2(x, y);
-	this->velocity = Vec2(0, 0);
-	this->acceleration = Vec2(0, 0);
+	this->position = Vec2f(x, y);
+	this->velocity = Vec2f(0, 0);
+	this->acceleration = Vec2f(0, 0);
 	//angular motion
 	this->rotation = 0.0f;
 	this->angularvelocity = 0.0f;
 	this->angularacceleration = 0.0f;
 	this->restitution = 1.0f;
 	this->friction = 0.7f;
-	this->sumForces = Vec2{ 0,0 };
+	this->sumForces = Vec2f{ 0,0 };
 	this->sumTorque = 0.0f;
 	this->mass = mass;
 	if (mass != 0.0f)
@@ -48,7 +48,7 @@ Body::~Body()
 
 void Body::integrateLinear(float deltatime)
 {
-	if (IsStatic())
+	if (movementstatic)
 	{
 		return;
 	}
@@ -64,7 +64,7 @@ void Body::integrateLinear(float deltatime)
 
 void Body::integrateAngular(float deltatime)
 {
-	if (IsStatic())
+	if (rotationstatic)
 	{
 		return;
 	}
@@ -78,7 +78,7 @@ void Body::integrateAngular(float deltatime)
 	ClearTorgue();
 }
 
-void Body::AddForce(const Vec2& force)
+void Body::AddForce(const Vec2f& force)
 {
 	sumForces += force;
 }
@@ -95,27 +95,27 @@ void Body::ClearTorgue()
 
 void Body::ClearForces()
 {
-	sumForces = Vec2(0.0f, 0.0f);
+	sumForces = Vec2f(0.0f, 0.0f);
 }
 
 bool Body::IsStatic() const 
 {
 	const float epsilon = 0.005f;
 	bool result = fabs(invMass - 0.0f) < epsilon;
-
+	 
 	return result;
 }
 
-void Body::ApplyImpulse(const Vec2& j)
+void Body::ApplyImpulse(const Vec2f& j)
 {
-	if (IsStatic()) return;
+	if (movementstatic) return;
 
 	velocity += j * invMass;
 }
 
-void Body::ApplyImpulse(const Vec2& j, const Vec2& r)
+void Body::ApplyImpulse(const Vec2f& j, const Vec2f& r)
 {
-	if (IsStatic()) return;
+	if (movementstatic || rotationstatic) return;
 
 	velocity += j * invMass;
 	angularvelocity += r.Cross(j) * invInertia;

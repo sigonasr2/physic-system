@@ -19,27 +19,27 @@ void Contact::ResolveCollision()
 	float f = std::min(a->friction, b->friction);
 
 	//const Vec2 vrel = (a->velocity - b->velocity);
-	Vec2 ra = end - a->position;
-	Vec2 rb = start - b->position;
-	Vec2 va = a->velocity + Vec2(-a->angularvelocity * ra.y, a->angularvelocity * ra.x);
-	Vec2 vb = b->velocity + Vec2(-b->angularvelocity * rb.y, a->angularvelocity * rb.x);
-	const Vec2 vrel = va - vb;
+	Vec2f ra = end - a->position;
+	Vec2f rb = start - b->position;
+	Vec2f va = a->velocity + Vec2f(-a->angularvelocity * ra.y, a->angularvelocity * ra.x);
+	Vec2f vb = b->velocity + Vec2f(-b->angularvelocity * rb.y, a->angularvelocity * rb.x);
+	const Vec2f vrel = va - vb;
 
 	float vrelDotNormal = vrel.Dot(normal);
-	const Vec2 impulseDirectionN = normal;
+	const Vec2f impulseDirectionN = normal;
     const float impulseMagnitudeN = -(1 + e) * vrelDotNormal / ((a->invMass + b->invMass) + ra.Cross(normal) * ra.Cross(normal) * a->invInertia
 		+ rb.Cross(normal) * rb.Cross(normal) * b->invInertia); 
-    Vec2 jn = impulseDirectionN * impulseMagnitudeN;
+    Vec2f jn = impulseDirectionN * impulseMagnitudeN;
 
 
-	Vec2 tangent = normal.Normal();
+	Vec2f tangent = normal.Normal();
 	float vrelDotTangent = vrel.Dot(tangent);
-	const Vec2 impulseDirectionT = tangent;
+	const Vec2f impulseDirectionT = tangent;
 	const float impulseMagnitudeT = f * -(1 + e) * vrelDotTangent / ((a->invMass + b->invMass) + ra.Cross(tangent) * ra.Cross(tangent) * a->invInertia
 		+ rb.Cross(tangent) * rb.Cross(tangent) * b->invInertia);
-	Vec2 jt = impulseDirectionT * impulseMagnitudeT;
+	Vec2f jt = impulseDirectionT * impulseMagnitudeT;
 
-	Vec2 J = jn + jt;
+	Vec2f J = jn + jt;
 
 	a->ApplyImpulse(J,ra);
 	b->ApplyImpulse(-J,rb);

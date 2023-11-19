@@ -30,7 +30,7 @@ bool CollisionDetection::IsCollidingCirclesToCircle(Body* a, Body* b, Contact& c
     CircleShape* aCircleShape = (CircleShape*)a->shape;
     CircleShape* bCircleShape = (CircleShape*)b->shape;
 
-    const Vec2 ab = b->position - a->position;
+    const Vec2f ab = b->position - a->position;
     const float radiusSum = aCircleShape->radius + bCircleShape->radius;
 
     bool isColliding = ab.MagnitudeSquared() <= (radiusSum * radiusSum);
@@ -57,8 +57,8 @@ bool CollisionDetection::IsCollidingPolygonToPolygon(Body* a, Body* b, Contact& 
     PolygonShape* aPolygonShape = (PolygonShape*)a->shape;
     PolygonShape* bPolygonShape = (PolygonShape*)b->shape;
 
-    Vec2 aAxis, bAxis;
-    Vec2 aPoint, bPoint;
+    Vec2f aAxis, bAxis;
+    Vec2f aPoint, bPoint;
 
     float abSeparation = aPolygonShape->FindMinSeparation(bPolygonShape, aAxis, aPoint);
     float baSeparation = bPolygonShape->FindMinSeparation(aPolygonShape,bAxis,bPoint);
@@ -94,21 +94,21 @@ bool CollisionDetection::IsCollidingPolygonToCircle(Body* polygon, Body* circle,
 {
     const PolygonShape* polygonShape = (PolygonShape*)polygon->shape;
     const CircleShape* circleShape = (CircleShape*)circle->shape;
-    const std::vector<Vec2>& polygonVertices = polygonShape->worldvertices;
+    const std::vector<Vec2f>& polygonVertices = polygonShape->worldvertices;
 
     bool isOutside = false;
-    Vec2 minCurrVertex;
-    Vec2 minNextVertex;
+    Vec2f minCurrVertex;
+    Vec2f minNextVertex;
     float distanceCircleEdge = std::numeric_limits<float>::lowest();
 
     for (int i = 0; i < polygonVertices.size(); i++)
     {
         int currVertex = i;
         int nextVertex = (i + 1) % polygonVertices.size();
-        Vec2 edge = polygonShape->EdgeAt(currVertex);
-        Vec2 normal = edge.Normal();
+        Vec2f edge = polygonShape->EdgeAt(currVertex);
+        Vec2f normal = edge.Normal();
 
-        Vec2 circleCenter = circle->position - polygonVertices[currVertex];
+        Vec2f circleCenter = circle->position - polygonVertices[currVertex];
         float projection = circleCenter.Dot(normal);
 
         if (projection > 0)
@@ -133,8 +133,8 @@ bool CollisionDetection::IsCollidingPolygonToCircle(Body* polygon, Body* circle,
     }
     if (isOutside)
     {
-        Vec2 v1 = circle->position - minCurrVertex;
-        Vec2 v2 = minNextVertex - minCurrVertex;
+        Vec2f v1 = circle->position - minCurrVertex;
+        Vec2f v2 = minNextVertex - minCurrVertex;
 
         if (v1.Dot(v2) < 0)
         {

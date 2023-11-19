@@ -4,20 +4,28 @@ void Application::Setup()
 {
 	Body* floor = new Body(BoxShape(800 - 50, 50), 400, 500, 0.0f);
 	floor->restitution = 0.5f;
+	floor->movementstatic = true;
+	floor->rotationstatic = true;
+	//floor->SetTexture("crate.png");
 	Bodies.push_back(floor);
 
 	Body* leftWall = new Body(BoxShape(50, 400), 50, 270, 0.0f);
+	leftWall->movementstatic = true;
+	leftWall->rotationstatic = true;
 	leftWall->restitution = 0.2f;
     Bodies.push_back(leftWall);
 
 	Body* rightWall = new Body(BoxShape(50, 400), 720, 270, 0.0f);
 	rightWall->restitution = 0.2f;
+	rightWall->movementstatic = true;
+	rightWall->rotationstatic = true;
 	Bodies.push_back(rightWall);
 
 
 	Body* bigBox = new Body(BoxShape(100, 100), 400, 300, 0.0f);
-	bigBox->rotation = 1.4f;
-	bigBox->restitution = 0.7f;
+	bigBox->rotation = 0.0f;
+	//bigBox->restitution = 0.7f;
+	bigBox->movementstatic = true;
 	bigBox->SetTexture("crate.png");
 	Bodies.push_back(bigBox);
 	
@@ -32,30 +40,33 @@ void Application::Input(olc::PixelGameEngine* ptr)
 		pushForce.y = -100 * PIXELS_PER_METER;
     if (ptr->GetKey(olc::DOWN).bPressed) 
 		pushForce.y = +100 * PIXELS_PER_METER;
-	if (ptr->GetKey(olc::LEFT).bHeld)  //Bodies[1]->angularvelocity = -100.0f * PIXELS_PER_METER;
-	if (ptr->GetKey(olc::RIGHT).bHeld) //Bodies[1]->angularvelocity = 100.0f * PIXELS_PER_METER;
+	if (ptr->GetKey(olc::LEFT).bHeld)  
+		Bodies[3]->angularvelocity = -5.0;
+	if (ptr->GetKey(olc::RIGHT).bHeld) 
+		Bodies[3]->angularvelocity = 5.0;
 
 	if (ptr->GetKey(olc::UP).bReleased) 
 		pushForce.y = 0;
 	if (ptr->GetKey(olc::DOWN).bReleased) pushForce.y = 0;
-	//if (ptr->GetKey(olc::LEFT).bReleased)  Bodies[1]->angularvelocity = 0;//pushForce.x = 0;
-	//if (ptr->GetKey(olc::RIGHT).bReleased) Bodies[1]->angularvelocity = 0;//pushForce.x = 0;
+	if (ptr->GetKey(olc::LEFT).bReleased)  Bodies[3]->angularvelocity = 0;//pushForce.x = 0;
+	if (ptr->GetKey(olc::RIGHT).bReleased) Bodies[3]->angularvelocity = 0;//pushForce.x = 0;
 	if (ptr->GetKey(olc::D).bPressed) debug = !debug;
 	if (ptr->GetMouse(0).bPressed)
 	{
 		int x = ptr->GetMouseX();
 		int y = ptr->GetMouseY();
-		std::vector<Vec2> vertices =
+		std::vector<Vec2f> vertices =
 		{
-			Vec2(20,60),
-			Vec2(-40,20),
-			Vec2(-20,-60),
-			Vec2(20, -60),
-			Vec2(40,20)
+			Vec2f(20,60),
+			Vec2f(-40,20),
+			Vec2f(-20,-60),
+			Vec2f(20, -60),
+			Vec2f(40,20)
 		};
 		Body* poly = new Body(PolygonShape(vertices), x, y, 2.0);
-		poly->restitution = 0.1f;
+		//poly->restitution = 0.1f;
 		poly->friction = 0.7f;
+		
 		Bodies.push_back(poly);
 	}
 	
@@ -71,20 +82,23 @@ void Application::Update(float deltatime,olc::PixelGameEngine* ptr)
 	//Bodies[1]->position = Vec2(ptr->GetMouseX(), ptr->GetMouseY());
 	//Bodies[1]->AddForce(pushForce);
 
-	for (auto body : Bodies)
+	for (int i = 0; i < Bodies.size(); i++)
 	{
+		Body* body = Bodies[i];
+		if (i != 3)
+		{
+			Vec2f drag = Force::GenerateDragForce(*body, 0.002f);
+			//body->AddForce(drag);
 
-		Vec2 drag = Force::GenerateDragForce(*body, 0.002f);
-		//body->AddForce(drag);
+			Vec2f weight = Vec2f(0.0f, body->mass * 9.8f * PIXELS_PER_METER);
+			body->AddForce(weight);
 
-		Vec2 weight = Vec2(0.0f, body->mass * 9.8f * PIXELS_PER_METER);
-		body->AddForce(weight);
+			float torque = 200;
+			//body->AddTorque(torque);
 
-		float torque = 200;
-		//body->AddTorque(torque);
-
-		Vec2 wind = Vec2(2.0f * PIXELS_PER_METER, 0.0f);
-		//body->AddForce(wind);
+			Vec2f wind = Vec2f(2.0f * PIXELS_PER_METER, 0.0f);
+			//body->AddForce(wind);
+		}
 	}
 
 	
@@ -129,6 +143,8 @@ void Application::Update(float deltatime,olc::PixelGameEngine* ptr)
 
 void Application::Render(olc::PixelGameEngine* ptr)
 {
+
+	
 	for (auto& body : Bodies)
 	{
 		
@@ -141,23 +157,51 @@ void Application::Render(olc::PixelGameEngine* ptr)
 		}
 		if(body->shape->GetType() == BOX)
 		{
+			
 			BoxShape* boxShape = (BoxShape*)body->shape;
+			
 			olc::vf2d pos = { body->position.x,body->position.y };
-			std::array<olc::vf2d, 4> newpos;
+			std::array<Vec2f, 4> newpos;
 			for (int i = 0; i < boxShape->worldvertices.size(); i++)
 			{
 				newpos[i].x = boxShape->worldvertices[i].x;
 				newpos[i].y = boxShape->worldvertices[i].y;
 			}
 
+			Vec2d mouse = { double(ptr->GetMouseX()), double(ptr->GetMouseY()) };
+
+			if (ptr->GetMouse(1).bPressed)
+			{
+				pSelected = nullptr;
+				for (auto& p : newpos)
+				{
+					if ((p - mouse).Magnitude() < 5)
+						pSelected = &p;
+				}
+			}
+
+			if (ptr->GetMouse(1).bReleased)
+			{
+				pSelected = nullptr;
+			}
 			
+			if (pSelected != nullptr)
+			{
+				*pSelected = mouse;
+			}
+
 			if (body->decal != NULL)
 			{
-				//ptr->DrawRotatedDecal({body->position.x - 20,body->position.y }, body->decal, body->rotation, {boxShape->width,boxShape->height}, {0.2f,0.2f});
-				//Graphics::DrawWrapedRotatedDecal(ptr, body->decal, newpos, body->rotation, { boxShape->width,boxShape->height });
 				
+				Graphics::Drawwrapsprite(ptr, newpos, body->sprite);
+				Graphics::DrawPolygon(ptr, body->position.x, body->position.y, newpos, 0xff00ff00);
+				for (int i = 0; i < boxShape->worldvertices.size(); i++)
+				{
+					ptr->FillCircle({ int(newpos[i].x),int(newpos[i].y) }, 4, olc::CYAN);
+				}
 			}
-			Graphics::DrawPolygon(ptr, body->position.x, body->position.y, boxShape->worldvertices, 0xff00ff00);
+			
+			
 		}
 		if (body->shape->GetType() == POLYGON)
 		{
@@ -175,9 +219,9 @@ void Application::Destroy()
 	}
 }
 
-void Application::DraweWireFrameModel(olc::PixelGameEngine* pge, const std::vector<Vec2> vecmodelcoordinates, float x, float y, float r, float s, olc::Pixel p)
+void Application::DraweWireFrameModel(olc::PixelGameEngine* pge, const std::vector<Vec2f> vecmodelcoordinates, float x, float y, float r, float s, olc::Pixel p)
 {
-	std::vector<Vec2> vecTransformedCoordinates;
+	std::vector<Vec2f> vecTransformedCoordinates;
 	int verts = vecmodelcoordinates.size();
 	vecTransformedCoordinates.resize(verts);
 

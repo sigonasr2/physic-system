@@ -24,7 +24,7 @@ struct CircleShape : public Shape
 {
 	float radius;
 	int vertexCount;
-	std::vector<Vec2> vertices;
+	std::vector<Vec2f> vertices;
 	CircleShape(const float radius,const int VerticesCount);
 	virtual ~CircleShape();
 	ShapeType GetType() const override; 
@@ -34,17 +34,17 @@ struct CircleShape : public Shape
 
 struct PolygonShape : public Shape
 {
-	std::vector<Vec2> localvertices;
-	std::vector<Vec2> worldvertices;
+	std::vector<Vec2f> localvertices;
+	std::vector<Vec2f> worldvertices;
 	PolygonShape() = default;
-	PolygonShape(const std::vector<Vec2> vertices);
+	PolygonShape(const std::vector<Vec2f> vertices);
 	virtual ~PolygonShape();
-	Vec2 EdgeAt(int index) const;
-	float FindMinSeparation(PolygonShape* other, Vec2& axis,Vec2& point);
+	Vec2f EdgeAt(int index) const;
+	float FindMinSeparation(PolygonShape* other, Vec2f& axis,Vec2f& point);
 	ShapeType GetType() const override;
 	Shape* Clone() const override;
 	float GetMomentOfInertia() const override;
-	void UpdateVertices(float angle, const Vec2& position);
+	void UpdateVertices(float angle, const Vec2f& position);
 };
 
 struct BoxShape : public PolygonShape
