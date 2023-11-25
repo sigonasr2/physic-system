@@ -133,6 +133,7 @@
     <ClCompile Include="Force.cpp" />
     <ClCompile Include="Body.cpp" />
     <ClCompile Include="Graphics.cpp" />
+    <ClCompile Include="ManipulatedSprite.cpp" />
     <ClCompile Include="Shape.cpp" />
     <ClCompile Include="source.cpp" />
     <ClCompile Include="Vec2.cpp" />
@@ -144,6 +145,7 @@
     <ClInclude Include="Contact.h" />
     <ClInclude Include="Force.h" />
     <ClInclude Include="Graphics.h" />
+    <ClInclude Include="ManipulatedSprite.h" />
     <ClInclude Include="olcPixelGameEngine.h" />
     <ClInclude Include="Body.h" />
     <ClInclude Include="Shape.h" />

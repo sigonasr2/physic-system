@@ -100,7 +100,7 @@ void Graphics::GetQuadBoundingBoxF(std::array<Vec2f, 4> vertices, Vec2i& upleft,
 
 bool Graphics::wrapsample(Vec2f q, Vec2f b1, Vec2f b2, Vec2f b3, olc::Sprite* sprite, olc::Pixel& color)
 {
-	auto wedge_2d = [=](Vec2f v, Vec2f w)
+	auto wedge_2d = [=](Vec2d v, Vec2d w)
 		{
 			return v.x * w.y - v.y * w.x;
 		};
@@ -180,9 +180,11 @@ void Graphics::Drawwrapsprite(olc::PixelGameEngine* pge, std::array<Vec2f, 4>& v
 		for (int x = UpperLeft.x; x <= LowerRight.x; x++) {
 			// ... and render them if sampling produces valid pixel
 			olc::Pixel pix2render;
+			
 			Vec2f q = Get_q(localCornerPoints, { double(x), double(y) });
 
 			if (wrapsample(q, b1, b2, b3, sprite, pix2render)) {
+				
 				pge->Draw(x, y, pix2render);
 			}
 		}

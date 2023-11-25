@@ -7,6 +7,7 @@
 #include "Graphics.h"
 #include "CollisionDetection.h"
 #include "Contact.h"
+#include "ManipulatedSprite.h"
 
 class Application
 {
@@ -18,6 +19,7 @@ public:
 	std::vector<Body*> Bodies;
 	Vec2f pushForce = Vec2f(0,0);
 	Vec2f* pSelected = nullptr;
+	int pIndex = -1;
 	float k = 500;
 	float restLength = 200.0f;
 	const int NUM_PARTICLES = 4;
@@ -26,7 +28,7 @@ public:
 	Vec2f mousereleasedlocation;
 	olc::Sprite* sprite;
 	olc::Decal* Dsprite;
-	
+	ManipulatedSprite MS;
 public:
 
 	void Setup();

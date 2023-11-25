@@ -13,7 +13,8 @@ struct Body
 	Vec2f sumForces;
 	float mass;
 	float invMass;
-
+	bool IsSet;
+	Vec2f mousecoord = { 0.0f,0.0f };
 	//angular
 	float rotation;
 	float angularvelocity;

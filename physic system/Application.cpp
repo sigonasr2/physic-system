@@ -29,6 +29,10 @@ void Application::Setup()
 	bigBox->SetTexture("crate.png");
 	Bodies.push_back(bigBox);
 	
+	for (int i = 0; i < Bodies.size(); i++)
+	{
+		MS.Setup(Bodies[i]);
+	}
 	//Body* ball = new Body(CircleShape(50, 20), 400, 300, 1.0f);
 	//ball->restitution = 0.1f;
 	//Bodies.push_back(ball);
@@ -41,9 +45,9 @@ void Application::Input(olc::PixelGameEngine* ptr)
     if (ptr->GetKey(olc::DOWN).bPressed) 
 		pushForce.y = +100 * PIXELS_PER_METER;
 	if (ptr->GetKey(olc::LEFT).bHeld)  
-		Bodies[3]->angularvelocity = -5.0;
+		Bodies[3]->angularvelocity = -1.0;
 	if (ptr->GetKey(olc::RIGHT).bHeld) 
-		Bodies[3]->angularvelocity = 5.0;
+		Bodies[3]->angularvelocity = 1.0;
 
 	if (ptr->GetKey(olc::UP).bReleased) 
 		pushForce.y = 0;
@@ -110,6 +114,7 @@ void Application::Update(float deltatime,olc::PixelGameEngine* ptr)
 		body->Update(deltatime);
 		
 	}
+	MS.mousecontrol(ptr);
 
 	for (int i = 0; i <= Bodies.size() - 1; i++)
 	{
@@ -160,46 +165,21 @@ void Application::Render(olc::PixelGameEngine* ptr)
 			
 			BoxShape* boxShape = (BoxShape*)body->shape;
 			
-			olc::vf2d pos = { body->position.x,body->position.y };
-			std::array<Vec2f, 4> newpos;
-			for (int i = 0; i < boxShape->worldvertices.size(); i++)
-			{
-				newpos[i].x = boxShape->worldvertices[i].x;
-				newpos[i].y = boxShape->worldvertices[i].y;
-			}
-
-			Vec2d mouse = { double(ptr->GetMouseX()), double(ptr->GetMouseY()) };
-
-			if (ptr->GetMouse(1).bPressed)
-			{
-				pSelected = nullptr;
-				for (auto& p : newpos)
-				{
-					if ((p - mouse).Magnitude() < 5)
-						pSelected = &p;
-				}
-			}
-
-			if (ptr->GetMouse(1).bReleased)
-			{
-				pSelected = nullptr;
-			}
 			
-			if (pSelected != nullptr)
-			{
-				*pSelected = mouse;
-			}
-
-			if (body->decal != NULL)
-			{
 				
-				Graphics::Drawwrapsprite(ptr, newpos, body->sprite);
-				Graphics::DrawPolygon(ptr, body->position.x, body->position.y, newpos, 0xff00ff00);
+			
+
+
+			
+
+			MS.Render(ptr,boxShape);
 				for (int i = 0; i < boxShape->worldvertices.size(); i++)
 				{
-					ptr->FillCircle({ int(newpos[i].x),int(newpos[i].y) }, 4, olc::CYAN);
+					ptr->FillCircle({ int(boxShape->worldvertices[i].x),int(boxShape->worldvertices[i].y) }, 4, olc::CYAN);
 				}
-			}
+			
+			
+			Graphics::DrawPolygon(ptr, body->position.x, body->position.y, boxShape->worldvertices, 0xff00ff00);
 			
 			
 		}
