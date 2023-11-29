@@ -17,6 +17,7 @@ struct Shape
 	virtual ShapeType GetType() const = 0;
 	virtual Shape* Clone() const = 0;
 	virtual float GetMomentOfInertia() const = 0;
+	int verticindex = 0;
 
 };
 
@@ -36,6 +37,7 @@ struct PolygonShape : public Shape
 {
 	std::vector<Vec2f> localvertices;
 	std::vector<Vec2f> worldvertices;
+	std::vector<Vec2f> offsetverts;
 	PolygonShape() = default;
 	PolygonShape(const std::vector<Vec2f> vertices);
 	virtual ~PolygonShape();
@@ -44,7 +46,7 @@ struct PolygonShape : public Shape
 	ShapeType GetType() const override;
 	Shape* Clone() const override;
 	float GetMomentOfInertia() const override;
-	void UpdateVertices(float angle, const Vec2f& position);
+	void UpdateVertices(float angle, const Vec2f& position, int index);
 };
 
 struct BoxShape : public PolygonShape

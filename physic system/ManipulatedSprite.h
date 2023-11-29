@@ -27,7 +27,7 @@ public:
 	void ScaleSprite(olc::Sprite* orgSprite, olc::Sprite** activeSpr, int nScale);
 	void Setup(Body* body);
 	void Render(olc::PixelGameEngine* pge,Body* body);
-	void mousecontrol(olc::PixelGameEngine* pge);
+	void mousecontrol(olc::PixelGameEngine* pge, Body* body, int& index);
 	void GetQuadBoundingBoxD(std::array<Vec2d, 4>& vertices,Vec2i& UpLeft, Vec2i& LwRight);
 	void GetQuadBoundingBoxF(std::array<Vec2f, 4>& vertices, Vec2i& UpLeft, Vec2i& LwRight);
 	void DrawWarpedSprite(olc::PixelGameEngine* pge, std::array<Vec2f, 4> points);

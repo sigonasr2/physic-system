@@ -1,9 +1,10 @@
 #include "Body.h"
 #include <iostream>
 
-Body::Body(const Shape& shape,float x, float y, float mass)
+Body::Body(const Shape& shape,int index,float x, float y, float mass)
 {
 	this->shape = shape.Clone();
+	this->bodyindex = index;
 	//linear motion
 	this->position = Vec2f(x, y);
 	this->velocity = Vec2f(0, 0);
@@ -127,7 +128,7 @@ void Body::SetTexture(const char* textureFileName)
 	decal = new olc::Decal(sprite);
 }
 
-void Body::Update(float deltatime)
+void Body::Update(float deltatime, int index)
 {
 	integrateLinear(deltatime);
 	integrateAngular(deltatime);
@@ -136,6 +137,7 @@ void Body::Update(float deltatime)
 	if (isPolygon)
 	{
 		PolygonShape* polygonshape = (PolygonShape*)shape;
-		polygonshape->UpdateVertices(rotation, position);
+		
+		polygonshape->UpdateVertices(rotation, position, index);
 	}
 }

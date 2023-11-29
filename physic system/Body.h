@@ -17,6 +17,8 @@ struct Body
 	Vec2f mousecoord = { 0.0f,0.0f };
 	//angular
 	float rotation;
+	Vec2f offset{ 0,0 };
+	int bodyindex;
 	float angularvelocity;
 	float angularacceleration;
 	float sumTorque;
@@ -30,7 +32,7 @@ struct Body
 	olc::Decal* decal = nullptr;
 	Shape* shape = nullptr;
 	Body() = default;
-	Body(const Shape& shape,float x, float y, float mass);
+	Body(const Shape& shape,int index,float x, float y, float mass);
 	~Body();
 	void integrateLinear(float deltatime);
 	void integrateAngular(float deltatime);
@@ -42,7 +44,7 @@ struct Body
 	void ApplyImpulse(const Vec2f& j);
 	void ApplyImpulse(const Vec2f& j, const Vec2f& r);
 	void SetTexture(const char* textureFileName);
-	void Update(float deltatime);
+	void Update(float deltatime,int index);
 };
 #endif // !body_H
 

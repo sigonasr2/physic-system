@@ -37,20 +37,22 @@ void ManipulatedSprite::Render(olc::PixelGameEngine* pge, Body* body)
 {
 	BoxShape* boxShape = (BoxShape*)body->shape;
 	std::array<Vec2f, 4> points;
-	for (int i = 0;i < boxShape->worldvertices.size(); i++)
-	{
-		points[i] = boxShape->worldvertices[i];
-	}
+	
+	
+	points[0] = boxShape->worldvertices[3];
+	points[1] = boxShape->worldvertices[2];
+	points[2] = boxShape->worldvertices[1];
+	points[3] = boxShape->worldvertices[0];
+	
 	//Vec2f centerpt = GetQuadCenterpoint(points);
 	//
 	//DrawRotatedWarpedSprite(pge,points,body->rotation,centerpt);
 	DrawWarpedSprite(pge, points);
 }
 
-void ManipulatedSprite::mousecontrol(olc::PixelGameEngine* pge)
+void ManipulatedSprite::mousecontrol(olc::PixelGameEngine* pge, Body* body, int& index)
 {
-	for (auto body : bodies)
-	{
+	
 		
 		if (body->shape->GetType() == BOX)
 		{
@@ -61,7 +63,7 @@ void ManipulatedSprite::mousecontrol(olc::PixelGameEngine* pge)
 
 
 
-			Vec2d mouse = { double(pge->GetMouseX()), double(pge->GetMouseY()) };
+			Vec2f mouse = { (float)pge->GetMouseX(), (float)pge->GetMouseY() };
 
 			if (pge->GetMouse(1).bPressed)
 			{
@@ -71,7 +73,9 @@ void ManipulatedSprite::mousecontrol(olc::PixelGameEngine* pge)
 					if ((boxShape->worldvertices[i] - mouse).Magnitude() < 5)
 					{
 						pSelected = &boxShape->worldvertices[i];
-						index = i;
+						index = body->bodyindex;
+						boxShape->verticindex = i;
+						break;
 					}
 
 
@@ -85,11 +89,27 @@ void ManipulatedSprite::mousecontrol(olc::PixelGameEngine* pge)
 
 			if (pSelected != nullptr)
 			{
+				Vec2f p = { pSelected->x, pSelected->y };
+				body->offset = mouse;
+				
 				*pSelected = mouse;
-				pge->DrawString(30, 30, "index: " + std::to_string(index));
+				for (int i = 0; i < boxShape->offsetverts.size(); i++)
+				{
+					if (boxShape->verticindex == i)
+					{
+						boxShape->offsetverts[i] = p - mouse;
+						break;
+					}
+				}
+				pge->DrawString(50, 10, "index: " + std::to_string(index));
+				pge->DrawString(50, 20, "0x: " + std::to_string(boxShape->offsetverts[boxShape->verticindex].x) + " 0y: " + std::to_string(boxShape->offsetverts[boxShape->verticindex].y));
 			}
+			
+				
+
+			
 		}
-	}
+	
 }
 
 void ManipulatedSprite::GetQuadBoundingBoxD(std::array<Vec2d, 4>& vertices, Vec2i& UpLeft, Vec2i& LwRight)
@@ -130,6 +150,8 @@ void ManipulatedSprite::DrawWarpedSprite(olc::PixelGameEngine* pge, std::array<V
 	// note that the corner points are passed in order: ul, ll, lr, ur, but the WarpedSample() algorithm
 	// assumes the order ll, lr, ul, ur. This rearrangement is done here
 	std::array<Vec2d, 4> localCornerPoints;
+	
+	
 
 	localCornerPoints[0] = points[1];
 	localCornerPoints[1] = points[2];

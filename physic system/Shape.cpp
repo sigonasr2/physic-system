@@ -43,6 +43,7 @@ PolygonShape::PolygonShape(const std::vector<Vec2f> vertices)
 	{
 		localvertices.push_back(vertex);
 		worldvertices.push_back(vertex);
+		
 	}
 }
 
@@ -112,12 +113,18 @@ float PolygonShape::GetMomentOfInertia() const
 	return 5000;
 }
 
-void PolygonShape::UpdateVertices(float angle, const Vec2f& position)
+void PolygonShape::UpdateVertices(float angle, const Vec2f& position, int index)
 {
 	for (int i = 0; i < localvertices.size(); i++)
 	{
+		Vec2f zero = { 0,0 };
 		worldvertices[i] = localvertices[i].Rotate(angle);
+		if(index == )
+	   worldvertices[i] = localvertices[i] + offsetverts[i];
+		
+		
 		worldvertices[i] += position;
+		
 	}
 }
 
@@ -135,6 +142,11 @@ BoxShape::BoxShape(float width, float height)
 	worldvertices.push_back(Vec2f(+width / 2.0f, -height / 2.0f));
 	worldvertices.push_back(Vec2f(+width / 2.0f, +height / 2.0f));
 	worldvertices.push_back(Vec2f(-width / 2.0f, +height / 2.0f));
+	offsetverts.push_back(Vec2f(0,0));
+	offsetverts.push_back(Vec2f(0,0));
+	offsetverts.push_back(Vec2f(0,0));
+	offsetverts.push_back(Vec2f(0,0));
+
 	
 }
 

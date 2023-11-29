@@ -29,6 +29,7 @@ public:
 	olc::Sprite* sprite;
 	olc::Decal* Dsprite;
 	ManipulatedSprite MS;
+	int index = 0;
 public:
 
 	void Setup();

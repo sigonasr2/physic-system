@@ -2,27 +2,27 @@
 
 void Application::Setup()
 {
-	Body* floor = new Body(BoxShape(800 - 50, 50), 400, 500, 0.0f);
+	Body* floor = new Body(BoxShape(800 - 50, 50),0 , 400, 500, 0.0f);
 	floor->restitution = 0.5f;
 	floor->movementstatic = true;
 	floor->rotationstatic = true;
 	//floor->SetTexture("crate.png");
 	Bodies.push_back(floor);
 
-	Body* leftWall = new Body(BoxShape(50, 400), 50, 270, 0.0f);
+	Body* leftWall = new Body(BoxShape(50, 400), 1, 50, 270, 0.0f);
 	leftWall->movementstatic = true;
 	leftWall->rotationstatic = true;
 	leftWall->restitution = 0.2f;
     Bodies.push_back(leftWall);
 
-	Body* rightWall = new Body(BoxShape(50, 400), 720, 270, 0.0f);
+	Body* rightWall = new Body(BoxShape(50, 400), 2, 720, 270, 0.0f);
 	rightWall->restitution = 0.2f;
 	rightWall->movementstatic = true;
 	rightWall->rotationstatic = true;
 	Bodies.push_back(rightWall);
 
 
-	Body* bigBox = new Body(BoxShape(100, 100), 400, 300, 0.0f);
+	Body* bigBox = new Body(BoxShape(100, 100),3, 400, 300, 0.0f);
 	bigBox->rotation = 0.0f;
 	//bigBox->restitution = 0.7f;
 	bigBox->movementstatic = true;
@@ -67,7 +67,7 @@ void Application::Input(olc::PixelGameEngine* ptr)
 			Vec2f(20, -60),
 			Vec2f(40,20)
 		};
-		Body* poly = new Body(PolygonShape(vertices), x, y, 2.0);
+		Body* poly = new Body(PolygonShape(vertices),1, x, y, 2.0);
 		//poly->restitution = 0.1f;
 		poly->friction = 0.7f;
 		
@@ -107,14 +107,17 @@ void Application::Update(float deltatime,olc::PixelGameEngine* ptr)
 
 	
 	
-
+	
 
 	for (auto body : Bodies)
 	{
-		body->Update(deltatime);
+		MS.mousecontrol(ptr, body, index);
+		
+		body->Update(deltatime, index);
+		
 		
 	}
-	MS.mousecontrol(ptr);
+	
 
 	for (int i = 0; i <= Bodies.size() - 1; i++)
 	{
@@ -168,8 +171,7 @@ void Application::Render(olc::PixelGameEngine* ptr)
 			
 				
 			
-
-
+			
 			
 
 			MS.Render(ptr,body);
