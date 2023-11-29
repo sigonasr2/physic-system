@@ -119,8 +119,10 @@ void PolygonShape::UpdateVertices(float angle, const Vec2f& position, int index)
 	{
 		Vec2f zero = { 0,0 };
 		worldvertices[i] = localvertices[i].Rotate(angle);
-		if(index == )
-	   worldvertices[i] = localvertices[i] + offsetverts[i];
+		if (index == bodyindex)
+		{
+			worldvertices[i] = localvertices[i] + offsetverts[i];
+		}
 		
 		
 		worldvertices[i] += position;

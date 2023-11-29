@@ -4,7 +4,7 @@
 Body::Body(const Shape& shape,int index,float x, float y, float mass)
 {
 	this->shape = shape.Clone();
-	this->bodyindex = index;
+	this->shape->bodyindex = index;
 	//linear motion
 	this->position = Vec2f(x, y);
 	this->velocity = Vec2f(0, 0);

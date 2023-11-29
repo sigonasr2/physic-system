@@ -73,7 +73,7 @@ void ManipulatedSprite::mousecontrol(olc::PixelGameEngine* pge, Body* body, int&
 					if ((boxShape->worldvertices[i] - mouse).Magnitude() < 5)
 					{
 						pSelected = &boxShape->worldvertices[i];
-						index = body->bodyindex;
+						index = boxShape->bodyindex;
 						boxShape->verticindex = i;
 						break;
 					}

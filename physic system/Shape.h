@@ -18,6 +18,7 @@ struct Shape
 	virtual Shape* Clone() const = 0;
 	virtual float GetMomentOfInertia() const = 0;
 	int verticindex = 0;
+	int bodyindex = 0;
 
 };
 
