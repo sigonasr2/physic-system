@@ -27,19 +27,31 @@ void ManipulatedSprite::Setup(Body* body)
 	nScaleSprite = 1;
 	scaleFactor = { 1.0f,1.0f };
 
+	
+
 	ScaleSprite(sprOrg, &activeSpr, nScaleSprite);
 
 }
 
-void ManipulatedSprite::Render(olc::PixelGameEngine* pge, BoxShape* box)
+void ManipulatedSprite::Render(olc::PixelGameEngine* pge, Body* body)
 {
-	DrawWarpedSprite(pge, box);
+	BoxShape* boxShape = (BoxShape*)body->shape;
+	std::array<Vec2f, 4> points;
+	for (int i = 0;i < boxShape->worldvertices.size(); i++)
+	{
+		points[i] = boxShape->worldvertices[i];
+	}
+	//Vec2f centerpt = GetQuadCenterpoint(points);
+	//
+	//DrawRotatedWarpedSprite(pge,points,body->rotation,centerpt);
+	DrawWarpedSprite(pge, points);
 }
 
 void ManipulatedSprite::mousecontrol(olc::PixelGameEngine* pge)
 {
 	for (auto body : bodies)
 	{
+		
 		if (body->shape->GetType() == BOX)
 		{
 
@@ -54,10 +66,15 @@ void ManipulatedSprite::mousecontrol(olc::PixelGameEngine* pge)
 			if (pge->GetMouse(1).bPressed)
 			{
 				pSelected = nullptr;
-				for (auto& p : boxShape->worldvertices)
+				for (int i = 0; i < boxShape->worldvertices.size();i++)
 				{
-					if ((p - mouse).Magnitude() < 5)
-						pSelected = &p;
+					if ((boxShape->worldvertices[i] - mouse).Magnitude() < 5)
+					{
+						pSelected = &boxShape->worldvertices[i];
+						index = i;
+					}
+
+
 				}
 			}
 
@@ -69,12 +86,13 @@ void ManipulatedSprite::mousecontrol(olc::PixelGameEngine* pge)
 			if (pSelected != nullptr)
 			{
 				*pSelected = mouse;
+				pge->DrawString(30, 30, "index: " + std::to_string(index));
 			}
 		}
 	}
 }
 
-void ManipulatedSprite::GetQuadBoundingBox(std::array<Vec2d, 4>& vertices, Vec2i& UpLeft, Vec2i& LwRight)
+void ManipulatedSprite::GetQuadBoundingBoxD(std::array<Vec2d, 4>& vertices, Vec2i& UpLeft, Vec2i& LwRight)
 {
 	UpLeft = { INT_MAX, INT_MAX };
 	LwRight = { INT_MIN,INT_MIN };
@@ -87,21 +105,36 @@ void ManipulatedSprite::GetQuadBoundingBox(std::array<Vec2d, 4>& vertices, Vec2i
 
 }
 
-void ManipulatedSprite::DrawWarpedSprite(olc::PixelGameEngine* pge, BoxShape* box)
+void ManipulatedSprite::GetQuadBoundingBoxF(std::array<Vec2f, 4>& vertices, Vec2i& UpLeft, Vec2i& LwRight)
+{
+	UpLeft = { INT_MAX, INT_MAX };
+	LwRight = { INT_MIN,INT_MIN };
+
+	for (int i = 0; i < vertices.size(); i++)
+	{
+		UpLeft = UpLeft.min(vertices[i]);
+		LwRight = LwRight.max(vertices[i]);
+	}
+}
+
+void ManipulatedSprite::DrawWarpedSprite(olc::PixelGameEngine* pge, std::array<Vec2f, 4> points)
 {
 	auto Get_q = [=](const  std::array<Vec2d, 4>& cPts, const Vec2d& curVert) -> Vec2d { return curVert - cPts[0];                     };
 	auto Get_b1 = [=](const std::array<Vec2d, 4>& cPts) -> Vec2d { return cPts[1] - cPts[0];                     };
 	auto Get_b2 = [=](const std::array<Vec2d, 4>& cPts) -> Vec2d { return cPts[2] - cPts[0];                     };
-	auto Get_b3 = [=](const std::array<Vec2d, 4>& cPts) -> Vec2d { return cPts[0] - cPts[1] - cPts[2] + cPts[3]; };
+	auto Get_b3 = [=](const std::array<Vec2d, 4>& cPts) -> Vec2d 
+		{ 
+			return cPts[0] - cPts[1] - cPts[2] + cPts[3]; 
+		};
 
 	// note that the corner points are passed in order: ul, ll, lr, ur, but the WarpedSample() algorithm
 	// assumes the order ll, lr, ul, ur. This rearrangement is done here
 	std::array<Vec2d, 4> localCornerPoints;
 
-	for (int i = 0; i < box->worldvertices.size(); i++)
-	{
-		localCornerPoints[i] = box->worldvertices[i];
-	}
+	localCornerPoints[0] = points[1];
+	localCornerPoints[1] = points[2];
+	localCornerPoints[2] = points[0];
+	localCornerPoints[3] = points[3];
 	
 	// get b1-b3 values from the quad corner points
 	// NOTE: the q value is associated per pixel and is obtained in the nested loop below
@@ -111,7 +144,7 @@ void ManipulatedSprite::DrawWarpedSprite(olc::PixelGameEngine* pge, BoxShape* bo
 
 	// determine the bounding box around the quad
 	Vec2i UpperLeft, LowerRight;
-	GetQuadBoundingBox(localCornerPoints, UpperLeft, LowerRight);
+	GetQuadBoundingBoxD(localCornerPoints, UpperLeft, LowerRight);
 
 	// iterate all pixels within the bounding box of the quad...
 	for (int y = UpperLeft.y; y <= LowerRight.y; y++) {
@@ -175,5 +208,53 @@ bool ManipulatedSprite::WarpedSample(Vec2d q, Vec2d b1, Vec2d b2, Vec2d b3, olc:
 	// return whether sampling produced a valid pixel
 	return (uv.x >= 0.0 && uv.x <= 1.0 &&
 		uv.y >= 0.0 && uv.y <= 1.0);
+}
+
+Vec2i ManipulatedSprite::GetQuadCenterpoint(std::array<Vec2f, 4> points)
+{
+	Vec2i UpperLeft, LowerRight;
+	GetQuadBoundingBoxF(points, UpperLeft, LowerRight);
+	// then return the points where the diagonals intersect
+	return UpperLeft + (LowerRight - UpperLeft) / 2.0;
+}
+
+void ManipulatedSprite::DrawRotatedWarpedSprite(olc::PixelGameEngine* pge, const std::array<Vec2f, 4>& cornerPoints, float fAngle, Vec2f centerPoint)
+{
+	std::array<Vec2d, 4> rotatedPoints;
+	for (int i = 0; i < 4; i++) {
+		rotatedPoints[i] = cornerPoints[i];
+	}
+	// convert float parameters to doubles
+	double dAngle = double(fAngle);
+	Vec2d dCenterPoint(centerPoint);
+
+	// rotate them around center point
+	RotateQuadPoints(rotatedPoints, dAngle, dCenterPoint);
+	// convert back to correct type
+	std::array<Vec2f, 4> localPoints;
+	for (int i = 0; i < 4; i++) {
+		localPoints[i] = rotatedPoints[i];
+	}
+	// draw sprite using rotated cornerpoints
+	DrawWarpedSprite(pge, localPoints);
+
+}
+
+void ManipulatedSprite::RotateQuadPoints(std::array<Vec2d, 4> points, float rotation, Vec2f centerpt)
+{
+	double dCosTheta = cos(rotation);
+	double dSinTheta = sin(rotation);
+	// iterate quad points
+	for (int i = 0; i < 4; i++) {
+		// first translate point so that center point aligns with origin
+		points[i] -= centerpt;
+		// rotate point - because x component is altered and used for calculating y component
+		// a cache is applied
+		Vec2d cachePoint = points[i];
+		points[i].x = cachePoint.x * dCosTheta - cachePoint.y * dSinTheta;
+		points[i].y = cachePoint.x * dSinTheta + cachePoint.y * dCosTheta;
+		// translate back
+		points[i] += centerpt;
+	}
 }
 

@@ -172,7 +172,7 @@ void Application::Render(olc::PixelGameEngine* ptr)
 
 			
 
-			MS.Render(ptr,boxShape);
+			MS.Render(ptr,body);
 				for (int i = 0; i < boxShape->worldvertices.size(); i++)
 				{
 					ptr->FillCircle({ int(boxShape->worldvertices[i].x),int(boxShape->worldvertices[i].y) }, 4, olc::CYAN);
