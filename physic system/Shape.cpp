@@ -12,7 +12,7 @@ CircleShape::CircleShape(const float radius, const int VerticesCount)
 
 	}
 
-	
+
 	std::cout << "circleshape constructor called" << std::endl;
 
 }
@@ -43,7 +43,7 @@ PolygonShape::PolygonShape(const std::vector<Vec2f> vertices)
 	{
 		localvertices.push_back(vertex);
 		worldvertices.push_back(vertex);
-		
+
 	}
 }
 
@@ -81,7 +81,7 @@ float PolygonShape::FindMinSeparation(PolygonShape* other, Vec2f& axis, Vec2f& p
 				minSep = proj;
 				minVertex = vb;
 			}
-			
+
 
 
 		}
@@ -118,15 +118,11 @@ void PolygonShape::UpdateVertices(float angle, const Vec2f& position, int index)
 	for (int i = 0; i < localvertices.size(); i++)
 	{
 		Vec2f zero = { 0,0 };
-		worldvertices[i] = localvertices[i].Rotate(angle);
-		if (index == bodyindex)
-		{
-			worldvertices[i] = localvertices[i] + offsetverts[i];
-		}
-		
-		
+		worldvertices[i] = localvertices[i].Rotate(angle) + offsetverts[i].Rotate(angle);
+
+
 		worldvertices[i] += position;
-		
+
 	}
 }
 
@@ -149,7 +145,7 @@ BoxShape::BoxShape(float width, float height)
 	offsetverts.push_back(Vec2f(0,0));
 	offsetverts.push_back(Vec2f(0,0));
 
-	
+
 }
 
 BoxShape::~BoxShape()
